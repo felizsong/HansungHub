@@ -1,5 +1,5 @@
 
-[![HansungHub_design](https://github.com/user-attachments/assets/7942f426-6f0f-4d26-a645-6e03b386785e)](https://youtu.be/RlaVpX3FA3k)
+[![HansungHub_design]<img src="https://github.com/user-attachments/assets/7942f426-6f0f-4d26-a645-6e03b386785e" width="300"/>(https://youtu.be/RlaVpX3FA3k)
 > ##### 🎥 이미지를 클릭하면 시연 영상을 볼 수 있습니다.
 
 
@@ -34,10 +34,14 @@ Hansung Hub는
 📄 마이페이지: 내가 예약한 내역을 시간순으로 확인
 
 <br>
-![README md](https://github.com/user-attachments/assets/c1d28153-61fe-451a-8c3d-f570c74c9e3c)
+
+
+![README md](https://github.com/user-attachments/assets/6073bcf0-9253-4b0b-85cf-147dd0c4f321)
 
 <br>
-![README md2](https://github.com/user-attachments/assets/30c8cab6-771d-40e4-9c23-a5172b9a2c14)
+
+
+![README md2](https://github.com/user-attachments/assets/eb0db53b-b468-46ec-a912-95300d97b321)
 
 <br>
 

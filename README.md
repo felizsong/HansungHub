@@ -1,5 +1,5 @@
 <a href="https://youtu.be/RlaVpX3FA3k" target="_blank">
-  <img src="https://github.com/user-attachments/assets/7942f426-6f0f-4d26-a645-6e03b386785e" width="500"/>
+  <img src="https://github.com/user-attachments/assets/7942f426-6f0f-4d26-a645-6e03b386785e" width="600"/>
 </a>
 
 > ##### 🎥 이미지를 클릭하면 시연 영상을 볼 수 있습니다.
@@ -27,7 +27,7 @@ Hansung Hub는
 
 🔐 학번/비밀번호 로그인 + 자동 로그인
 
-🏢 시설 안내: 공간 위치/용도/수용 인원 확인
+🏢 시설 안내: 공간 위치/용도 확인
 
 🗺️ 상세 공간 안내: 도면 기반 시각화 + 좌석 조건 안내
 

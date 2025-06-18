@@ -20,7 +20,7 @@ class LoginViewController: UIViewController {
         updateCheckboxUI()
         // 비밀번호 가림
         passwordTextField.isSecureTextEntry = true
-
+        
         addPadding(to: studentIdTextField)
         addPadding(to: passwordTextField)
         
@@ -106,27 +106,35 @@ class LoginViewController: UIViewController {
     
     
     func loginToHansung(studentId: String, password: String, completion: @escaping (Bool) -> Void) {
-        let url = URL(string: "https://learn.hansung.ac.kr/login/index.php")!
+        let url = URL(string: "https://www.hansung.ac.kr/hnuLogin/hansung/loginProcess.do")!
         
-        // 초기 요청
-        let initialRequest = URLRequest(url: url)
+        let config = URLSessionConfiguration.default
+        config.httpCookieStorage = HTTPCookieStorage.shared
+        config.httpCookieAcceptPolicy = .always
+        config.httpShouldSetCookies = true
+        let session = URLSession(configuration: config)
         
-        URLSession.shared.dataTask(with: initialRequest) { data, response, error in
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        let bodyString = "username=\(studentId)&password=\(password)"
+        request.httpBody = bodyString.data(using: .utf8)
+        request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+        
+        // 초기 요청으로 쿠키 생성
+        session.dataTask(with: url) { _, _, error in
             guard error == nil else {
                 print("초기 요청 실패: \(error!)")
                 completion(false)
                 return
             }
             
-            // 로그인 요청
             var request = URLRequest(url: url)
             request.httpMethod = "POST"
             let bodyString = "username=\(studentId)&password=\(password)"
             request.httpBody = bodyString.data(using: .utf8)
             request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
             
-            // 쿠키 저장
-            URLSession.shared.dataTask(with: request) { data, response, error in
+            session.dataTask(with: request) { data, _, error in
                 guard let data = data, error == nil else {
                     print("로그인 요청 실패: \(error!)")
                     completion(false)
@@ -135,11 +143,16 @@ class LoginViewController: UIViewController {
                 
                 if let html = String(data: data, encoding: .utf8),
                    !html.contains("잘못 입력") {
-                    // 로그인 성공
                     print("로그인 성공")
+                    
+                    // 쿠키 확인
+                    if let cookies = HTTPCookieStorage.shared.cookies {
+                        for cookie in cookies {
+                            print("🍪 \(cookie.name): \(cookie.value)")
+                        }
+                    }
                     completion(true)
                 } else {
-                    // 로그인 실패
                     print("로그인 실패")
                     completion(false)
                 }
@@ -147,6 +160,7 @@ class LoginViewController: UIViewController {
         }.resume()
     }
 }
+
 
 // 텍스트필드에 패딩 값
 func addPadding(to textField: UITextField) {

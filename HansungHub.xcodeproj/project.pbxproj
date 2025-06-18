@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		9D3F2C392E02237D00048F78 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 9D3F2C382E02237D00048F78 /* SwiftSoup */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		11CE359A43A80320E336DFF0 /* Pods_HansungHub.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_HansungHub.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9D0C32FC2DF16F2300D916B7 /* HansungHub.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HansungHub.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -37,6 +41,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9D3F2C392E02237D00048F78 /* SwiftSoup in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -115,6 +120,9 @@
 			);
 			mainGroup = 9D0C32F32DF16F2300D916B7;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				9D3F2C372E02237D00048F78 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 9D0C32FD2DF16F2300D916B7 /* Products */;
 			projectDirPath = "";
@@ -343,6 +351,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		9D3F2C372E02237D00048F78 /* XCRemoteSwiftPackageReference "SwiftSoup" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/scinfu/SwiftSoup.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.8.8;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		9D3F2C382E02237D00048F78 /* SwiftSoup */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9D3F2C372E02237D00048F78 /* XCRemoteSwiftPackageReference "SwiftSoup" */;
+			productName = SwiftSoup;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 9D0C32F42DF16F2300D916B7 /* Project object */;
 }

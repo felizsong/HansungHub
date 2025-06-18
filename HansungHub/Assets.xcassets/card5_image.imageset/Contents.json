@@ -1,12 +1,12 @@
 {
   "images" : [
     {
-      "filename" : "card1_image.png",
+      "filename" : "card5_image.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "card1_image 1.png",
+      "filename" : "card5_image 1.png",
       "idiom" : "universal",
       "scale" : "2x"
     },

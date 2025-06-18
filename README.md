@@ -37,6 +37,14 @@ Hansung Hub는
 
 <br>
 
+## 📲 사용 흐름
+
+| 메인 화면 | 안내 화면 | 예약 화면 | 내역 확인 |
+|-----------|-----------|------------|------------|
+| ![메인](https://github.com/user-attachments/assets/dafd809f-e3e9-4751-b8b5-44da4ef87257) | ![시설](https://github.com/user-attachments/assets/ffeb1d53-b7b8-4632-8572-d89612063e2f) | ![예약](https://github.com/user-attachments/assets/dcef7fe7-a077-4f3d-8328-837a42bde6fc) | ![내역](https://github.com/user-attachments/assets/0a62c98d-a9da-4daa-9d3d-9d43583d3b9c)|
+> 사용자는 공간 → 날짜 → 시간 순으로 손쉽게 예약을 완료할 수 있습니다.
+
+<br>
 
 ![README md](https://github.com/user-attachments/assets/6073bcf0-9253-4b0b-85cf-147dd0c4f321)
 

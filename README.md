@@ -1,5 +1,4 @@
-
-[![HansungHub_design]<img src="https://github.com/user-attachments/assets/7942f426-6f0f-4d26-a645-6e03b386785e" width="300"/>(https://youtu.be/RlaVpX3FA3k)
+<img src="https://github.com/user-attachments/assets/7942f426-6f0f-4d26-a645-6e03b386785e" width="300"/>(https://youtu.be/RlaVpX3FA3k)
 > ##### 🎥 이미지를 클릭하면 시연 영상을 볼 수 있습니다.
 
 

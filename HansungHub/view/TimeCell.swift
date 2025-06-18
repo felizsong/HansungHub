@@ -6,7 +6,7 @@ class TimeCell: UICollectionViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         
-        // 버튼 제약 코드 설정 (필요할 경우만)
+        // 버튼 제약 코드 설정
         timeButton.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             timeButton.topAnchor.constraint(equalTo: contentView.topAnchor),
@@ -31,17 +31,28 @@ class TimeCell: UICollectionViewCell {
         timeButton.titleLabel?.minimumScaleFactor = 0.8
     }
 
-    func configure(title: String, selected: Bool) {
+    func configure(title: String, selected: Bool, disabled: Bool = false) {
         timeButton.setTitle(title, for: .normal)
 
-        if selected {
-            timeButton.backgroundColor = UIColor(hex: "#50453B")
-            timeButton.setTitleColor(UIColor(hex: "#FBFAF9"), for: .normal)
-            timeButton.layer.borderColor = UIColor.clear.cgColor
-        } else {
+        if disabled {
             timeButton.backgroundColor = .white
-            timeButton.setTitleColor(.black, for: .normal)
+            timeButton.setTitleColor(UIColor(hex: "#AAAAAA"), for: .normal)
             timeButton.layer.borderColor = UIColor(hex: "#D0D0D0").cgColor
+        } else {
+            if selected {
+                timeButton.backgroundColor = UIColor(hex: "#50453B")
+                timeButton.setTitleColor(UIColor(hex: "#FBFAF9"), for: .normal)
+                timeButton.layer.borderColor = UIColor.clear.cgColor
+            } else {
+                timeButton.backgroundColor = .white
+                timeButton.setTitleColor(.black, for: .normal)
+                timeButton.layer.borderColor = UIColor(hex: "#D0D0D0").cgColor
+            }
         }
+
+        timeButton.layer.cornerRadius = 20
+        timeButton.layer.borderWidth = 1
+        timeButton.clipsToBounds = true
     }
+
 }

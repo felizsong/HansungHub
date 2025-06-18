@@ -1,10 +1,12 @@
 import UIKit
+import SwiftSoup
 
 class ReserveViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UITextFieldDelegate {
     var facilityTitle: String?
+    var reservationURL: String?
 
     @IBOutlet weak var mainView: UIView!
-    @IBOutlet weak var applicationBtn: UIButton!
+   // @IBOutlet weak var applicationBtn: UIButton!
     @IBOutlet weak var titleLabel: UILabel!
 
     @IBOutlet weak var studentIdLabel: UILabel!
@@ -53,6 +55,8 @@ class ReserveViewController: UIViewController, UICollectionViewDataSource, UICol
     
     let time: [String] = (9...20).map { String(format: "%02d:00", $0) }
     var selectedTimeIndices: Set<Int> = []
+    
+    var disabledTimeSlots: Set<String> = []
 
     let BaseIdMap: [String: String] = [
         "IB111": "64", "IB101": "63", "IB102": "62", "IB103": "61",
@@ -82,82 +86,88 @@ class ReserveViewController: UIViewController, UICollectionViewDataSource, UICol
     }
 
     override func viewDidLoad() {
-            super.viewDidLoad()
+        super.viewDidLoad()
 
-            // 기본 UI 셋업
-            mainView.backgroundColor = UIColor(hex: "#FBFAF9")
-            titleLabel.text = facilityTitle?.isEmpty == false ? facilityTitle : "상상베이스"
+        // 기본 UI 셋업
+        mainView.backgroundColor = UIColor(hex: "#FBFAF9")
+        titleLabel.text = facilityTitle?.isEmpty == false ? facilityTitle : "상상베이스"
 
-            applicationBtn.layer.cornerRadius = applicationBtn.frame.height / 2
-            applicationBtn.clipsToBounds = true
-            applicationBtn.titleLabel?.font = UIFont(name: "MangoDdobak-B", size: 16)
+//            applicationBtn.layer.cornerRadius = applicationBtn.frame.height / 2
+//            applicationBtn.clipsToBounds = true
+//            applicationBtn.titleLabel?.font = UIFont(name: "MangoDdobak-B", size: 16)
 
-            // 텍스트 필드 설정
-            studentIdField.delegate = self
-            countField.delegate = self
+        // 텍스트 필드 설정
+        studentIdField.delegate = self
+        countField.delegate = self
+        
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tapGesture.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapGesture)
 
-            // 카드 스타일 뷰
-            selectRoomView.customRoundedCardStyle()
-            selectRoomView.superview?.clipsToBounds = false
-            calendarContainerView.customRoundedCardStyle()
-            calendarContainerView.superview?.clipsToBounds = false
+
+        // 카드 스타일 뷰
+        selectRoomView.customRoundedCardStyle()
+        selectRoomView.superview?.clipsToBounds = false
+        calendarContainerView.customRoundedCardStyle()
+        calendarContainerView.superview?.clipsToBounds = false
         selectTimeView.customRoundedCardStyle()
         selectTimeView.superview?.clipsToBounds = false
 
-            // 공간 선택 CollectionView 설정
-            if let layout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout {
-                layout.estimatedItemSize = .zero
-            }
-            collectionView.isScrollEnabled = false
-            collectionView.delegate = self
-            collectionView.dataSource = self
-            collectionView.isHidden = false
+        // 공간 선택 CollectionView 설정
+        if let layout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout {
+            layout.estimatedItemSize = .zero
+        }
+        collectionView.isScrollEnabled = false
+        collectionView.delegate = self
+        collectionView.dataSource = self
+        collectionView.isHidden = false
+            
+        // 접기/펼치기 화살표
+        selectRoom.transform = CGAffineTransform(rotationAngle: isExpanded ? .pi / 2 : -.pi / 2)
+        let tapGesture1 = UITapGestureRecognizer(target: self, action: #selector(toggleArrow))
+        selectRoom.isUserInteractionEnabled = true
+        selectRoom.addGestureRecognizer(tapGesture1)
 
-            // 접기/펼치기 화살표
-            selectRoom.transform = CGAffineTransform(rotationAngle: .pi * 1.5)
-            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(toggleArrow))
-            selectRoom.isUserInteractionEnabled = true
-            selectRoom.addGestureRecognizer(tapGesture)
+        // 높이 초기화
+        selectRoomHeight.constant = 60
 
-            // 높이 초기화
-            selectRoomHeight.constant = 60
-
-            // 날짜 선택 CollectionView 설정
-            if let calendarLayout = calendarCollectionView.collectionViewLayout as? UICollectionViewFlowLayout {
-                calendarLayout.minimumLineSpacing = 10
-                calendarLayout.minimumInteritemSpacing = 10
-            }
-            // 높이 초기화
-            selectRoomHeight.constant = 60
-        
-            calendarCollectionView.delegate = self
-            calendarCollectionView.dataSource = self
-            calendarContainerView.isHidden = false
-
-        
-            // 날짜 설정
-            setupCalendarDates()
-            setupCalendarHeader()
-
-            calendarContainerHeight.constant = 80
+        // 날짜 선택 CollectionView 설정
+        if let calendarLayout = calendarCollectionView.collectionViewLayout as? UICollectionViewFlowLayout {
+            calendarLayout.minimumLineSpacing = 10
+            calendarLayout.minimumInteritemSpacing = 10
+        }
+        // 높이 초기화
+        selectRoomHeight.constant = 60
     
-
-            // 날짜 영역 화살표
-        selectCalendar.transform = CGAffineTransform(rotationAngle: .pi * 1.5)
-
-            let tapGesture2 = UITapGestureRecognizer(target: self, action: #selector(toggleArrow2))
-            selectCalendar.isUserInteractionEnabled = true
-            selectCalendar.addGestureRecognizer(tapGesture2)
+        calendarCollectionView.delegate = self
+        calendarCollectionView.dataSource = self
+        calendarContainerView.isHidden = false
         
+        
+        // 날짜 설정
+        setupCalendarDates()
+        setupCalendarHeader()
+
+        calendarContainerHeight.constant = 80
+        // 오늘 날짜 선택 및 비활성 시간 업데이트
+        let today = Calendar.current.startOfDay(for: Date())
+        selectedDate = today
+        updateDisabledTimes()
+        
+        // 날짜 영역 화살표
+        selectCalendar.transform = CGAffineTransform(rotationAngle: isExpandedCalendar ? .pi / 2 : -.pi / 2)
+
+        let tapGesture2 = UITapGestureRecognizer(target: self, action: #selector(toggleArrow2))
+        selectCalendar.isUserInteractionEnabled = true
+        selectCalendar.addGestureRecognizer(tapGesture2)
+    
         // 시간 영역 화살표
-        selectTimeImage.transform = CGAffineTransform(rotationAngle: .pi * 1.5)
+        selectTimeImage.transform = CGAffineTransform(rotationAngle: isExpandedTimer ? .pi / 2 : -.pi / 2)
 
-            let tapGesture3 = UITapGestureRecognizer(target: self, action: #selector(toggleArrow3))
-            selectTimeImage.isUserInteractionEnabled = true
-            selectTimeImage.addGestureRecognizer(tapGesture3)
-        
-        
-       
+        let tapGesture3 = UITapGestureRecognizer(target: self, action: #selector(toggleArrow3))
+        selectTimeImage.isUserInteractionEnabled = true
+        selectTimeImage.addGestureRecognizer(tapGesture3)
+    
         // 시간 선택 CollectionView 설정
         if let layout = timeCollection.collectionViewLayout as? UICollectionViewFlowLayout {
             layout.estimatedItemSize = .zero
@@ -168,6 +178,20 @@ class ReserveViewController: UIViewController, UICollectionViewDataSource, UICol
 
         // 높이 초기화
         timerContainerHeight.constant = 60
+        
+        let applyButton = UIButton(type: .system)
+        applyButton.setTitle("신청", for: .normal)
+        applyButton.setTitleColor(.white, for: .normal)
+        applyButton.backgroundColor = UIColor(hex: "#50453B")
+        applyButton.titleLabel?.font = UIFont(name: "MangoDdobak-B", size: 16)
+        applyButton.layer.cornerRadius = 18
+        applyButton.frame = CGRect(x: 0, y: 0, width: 80, height: 34)
+        applyButton.addTarget(self, action: #selector(didTapApplication(_:)), for: .touchUpInside)
+        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: applyButton)
+    }
+
+    @objc func dismissKeyboard() {
+        view.endEditing(true)
     }
 
     override func viewDidLayoutSubviews() {
@@ -262,7 +286,7 @@ class ReserveViewController: UIViewController, UICollectionViewDataSource, UICol
 
         // MARK: - 접기/펼치기 제어
         @objc func toggleArrow() {
-            let angle: CGFloat = isExpanded ? .pi * 1.5 : .pi / 2
+            let angle: CGFloat = isExpanded ? -.pi / 2 : .pi / 2
             isExpanded.toggle()
 
             UIView.animate(withDuration: 0.3) {
@@ -275,7 +299,7 @@ class ReserveViewController: UIViewController, UICollectionViewDataSource, UICol
         }
 
         @objc func toggleArrow2() {
-            let angle: CGFloat = isExpandedCalendar ? .pi * 1.5 : .pi / 2
+            let angle: CGFloat = isExpandedCalendar ? -.pi / 2 : .pi / 2
             isExpandedCalendar.toggle()
 
             UIView.animate(withDuration: 0.3) {
@@ -288,7 +312,7 @@ class ReserveViewController: UIViewController, UICollectionViewDataSource, UICol
         }
     
     @objc func toggleArrow3() {
-        let angle: CGFloat = isExpandedTimer ? .pi * 1.5 : .pi / 2
+        let angle: CGFloat = isExpandedTimer ? -.pi / 2 : .pi / 2
         isExpandedTimer.toggle()
 
         UIView.animate(withDuration: 0.3) {
@@ -320,9 +344,11 @@ class ReserveViewController: UIViewController, UICollectionViewDataSource, UICol
             return cell
         } else if collectionView == timeCollection {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "TimeCell", for: indexPath) as! TimeCell
+            let title = time[indexPath.item]
             let isSelected = selectedTimeIndices.contains(indexPath.item)
-            cell.configure(title: time[indexPath.item], selected: isSelected)
-            return cell
+            let isDisabled = disabledTimeSlots.contains(title) // ✅ 비활성 여부 확인
+                cell.configure(title: title, selected: isSelected, disabled: isDisabled)
+                return cell
         } else {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "RoomCell", for: indexPath) as! RoomCell
             let isSelected = (indexPath.item == selectedIndex)
@@ -337,7 +363,11 @@ class ReserveViewController: UIViewController, UICollectionViewDataSource, UICol
             guard newDate != Date.distantPast else { return }
             selectedDate = newDate
             collectionView.reloadData()
+            
+            updateDisabledTimes()
         } else if collectionView == timeCollection {
+            guard selectedDate != nil, selectedIndex != nil else { return } // 공간+날짜 선택 안 했으면 무시
+            
             if selectedTimeIndices.contains(indexPath.item) {
                 selectedTimeIndices.remove(indexPath.item)
             } else {
@@ -353,6 +383,8 @@ class ReserveViewController: UIViewController, UICollectionViewDataSource, UICol
                 toReload.append(IndexPath(item: prev, section: 0))
             }
             collectionView.reloadItems(at: toReload)
+            
+            updateDisabledTimes()
         }
     }
 
@@ -385,6 +417,120 @@ class ReserveViewController: UIViewController, UICollectionViewDataSource, UICol
         }
     }
     
+    func updateDisabledTimes() {
+        guard let selectedDate = selectedDate,
+              let selectedIndex = selectedIndex,
+              rooms.indices.contains(selectedIndex) else {
+            disabledTimeSlots = []
+            timeCollection.reloadData()
+            return
+        }
+
+        let roomName = rooms[selectedIndex]
+        fetchDisabledTimeSlots(forRoom: roomName, on: selectedDate) { disabled in
+            self.disabledTimeSlots = disabled
+            self.timeCollection.reloadData()
+        }
+    }
+    
+    func fetchDisabledTimeSlots(forRoom roomName: String, on date: Date, completion: @escaping (Set<String>) -> Void) {
+        guard let url = URL(string: "https://www.hansung.ac.kr/onestop/8952/subview.do") else {
+            completion([])
+            return
+        }
+
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        let selectedDateStr = dateFormatter.string(from: date)
+
+        URLSession.shared.dataTask(with: url) { data, _, error in
+            guard let data = data, let html = String(data: data, encoding: .utf8), error == nil else {
+                print("❌ 네트워크 오류: \(error?.localizedDescription ?? "Unknown error")")
+                completion([])
+                return
+            }
+            
+
+            do {
+                let doc: Document = try SwiftSoup.parse(html)
+                let elements = try doc.select("div.conBox")
+                var disabledSet: Set<String> = []
+                
+                for element in elements {
+                    var matchedRoom = false
+                    var matchedDate = false
+                    var commentRoomName = ""
+                
+                    for node in element.getChildNodes() {
+                        if node.nodeName() == "#comment", let commentNode = node as? Comment {
+                            let comment = try commentNode.getData()
+                            matchedDate = comment.contains(selectedDateStr)
+                        }
+
+                        if let textNode = node as? TextNode {
+                            let line = textNode.text().trimmingCharacters(in: .whitespacesAndNewlines)
+                            
+                            // 방 이름 매칭: 예) " - IB101" 또는 "IB101" 포함된 경우
+                            if line.contains(roomName) && line.replacingOccurrences(of: "\"", with: "").contains("- \(roomName)") {
+                                matchedRoom = true
+                            }
+
+                            // 시간 정보 파싱
+                            if matchedRoom && matchedDate && line.contains("~") {
+                                let cleanedLine = line.replacingOccurrences(of: "\"", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
+                                let times = self.matches(in: cleanedLine, pattern: "\\d{2}:\\d{2}~\\d{2}:\\d{2}")
+
+                                for range in times {
+                                    let parts = range.components(separatedBy: "~")
+                                    if parts.count == 2 {
+                                        let start = self.timeStringToInt(parts[0])
+                                        let end = self.timeStringToInt(parts[1])
+                                        for t in start..<end {
+                                            let slot = String(format: "%02d:00", t)
+                                            disabledSet.insert(slot)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                       
+
+                    }
+                }
+
+                DispatchQueue.main.async {
+                    completion(disabledSet)
+                }
+                print("🚫 disabledSet: \(disabledSet)")
+
+            } catch {
+                print("❌ SwiftSoup 파싱 오류: \(error.localizedDescription)")
+                completion([])
+            }
+        }.resume()
+    }
+
+    func matches(in text: String, pattern: String) -> [String] {
+        do {
+            let regex = try NSRegularExpression(pattern: pattern)
+            let results = regex.matches(in: text, range: NSRange(text.startIndex..., in: text))
+            return results.compactMap {
+                Range($0.range, in: text).map { String(text[$0]) }
+            }
+        } catch {
+            return []
+        }
+    }
+
+    func timeStringToInt(_ time: String) -> Int {
+        let parts = time.split(separator: ":")
+        if let hour = Int(parts[0]) {
+            return hour
+        }
+        return -1
+    }
+
+    
     // 엔터 누르면 키보드 내려감
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
@@ -394,6 +540,106 @@ class ReserveViewController: UIViewController, UICollectionViewDataSource, UICol
     // 섹션
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 1
+    }
+    
+    
+    
+    @objc func didTapApplication(_ sender: Any) {
+        guard let reservationURL = reservationURL, let url = URL(string: reservationURL) else { return }
+        guard let studentId = studentIdField.text, !studentId.isEmpty,
+              let count = countField.text, !count.isEmpty,
+              let selectedDate = selectedDate,
+              let roomIndex = selectedIndex,
+              rooms.indices.contains(roomIndex) else {
+            print("입력값 누락")
+            return
+        }
+
+        // 하드코딩된 사용자 정보
+        let userName = getSecret("userNm")
+        let telno = getSecret("telno")
+        let email = getSecret("email")
+
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        let dateStr = formatter.string(from: selectedDate)
+        let times = self.selectedTimeIndices.sorted().map { self.time[$0] }
+        let savedStudentId = UserDefaults.standard.string(forKey: "studentId") ?? ""
+
+        var components = URLComponents()
+        var queryItems: [URLQueryItem] = [
+            URLQueryItem(name: "siteId", value: "onestop"),
+            URLQueryItem(name: "fnctNo", value: "21"),
+            URLQueryItem(name: "groupNm", value: "상상베이스"),
+            URLQueryItem(name: "spceNm", value: self.rooms[roomIndex]),
+            URLQueryItem(name: "resveSpceSeq", value: self.BaseIdMap[self.rooms[roomIndex]] ?? ""),
+            URLQueryItem(name: "resveDeStr", value: dateStr),
+            URLQueryItem(name: "userNm", value: userName),
+            URLQueryItem(name: "hakbun", value: savedStudentId),
+            URLQueryItem(name: "telno", value: telno),
+            URLQueryItem(name: "email", value: email),
+            URLQueryItem(name: "addItemMustYn1", value: "Y"),
+            URLQueryItem(name: "addItem1", value: studentId),
+            URLQueryItem(name: "addItemMustYn2", value: "Y"),
+            URLQueryItem(name: "addItem2", value: count),
+            URLQueryItem(name: "group", value: "37"),
+            URLQueryItem(name: "resveGroupSeq", value: "37"),
+            URLQueryItem(name: "mngr", value: "학생원스톱지원센터"),
+            URLQueryItem(name: "mngrTelno", value: "02-760-8000"),
+            URLQueryItem(name: "identityCode", value: "교수,직원,조교,강사,학술연구원,기타교수,학사(재학생),대학원(재학생)")
+        ]
+
+        for t in times {
+            queryItems.append(URLQueryItem(name: "resveTm", value: t))
+        }
+
+        components.queryItems = queryItems
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+        request.httpBody = components.percentEncodedQuery?.data(using: .utf8)
+
+        if let cookies = HTTPCookieStorage.shared.cookies(for: url) {
+            let cookieHeader = cookies.map { "\($0.name)=\($0.value)" }.joined(separator: "; ")
+            request.setValue(cookieHeader, forHTTPHeaderField: "Cookie")
+        }
+
+        if let body = request.httpBody, let bodyStr = String(data: body, encoding: .utf8) {
+            print("📦 Body:\n\(bodyStr)")
+        }
+
+        let sessionConfig = URLSessionConfiguration.default
+        sessionConfig.httpCookieAcceptPolicy = .always
+        sessionConfig.httpShouldSetCookies = true
+        sessionConfig.httpCookieStorage = HTTPCookieStorage.shared
+        let session = URLSession(configuration: sessionConfig)
+
+        session.dataTask(with: request) { data, response, error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    print("Error: \(error.localizedDescription)")
+                    return
+                }
+                if let response = response as? HTTPURLResponse {
+                    print("Response: \(response.statusCode)")
+                    if (200...299).contains(response.statusCode) {
+                        self.navigationController?.popToRootViewController(animated: true)
+                    }
+                }
+                if let data = data, let str = String(data: data, encoding: .utf8) {
+                    print("Response Body: \(str)")
+                }
+            }
+        }.resume()
+    }
+    
+    func getSecret(_ key: String) -> String {
+        if let path = Bundle.main.path(forResource: "Secrets", ofType: "plist"),
+           let dict = NSDictionary(contentsOfFile: path) as? [String: String] {
+            return dict[key] ?? ""
+        }
+        return ""
     }
 
 

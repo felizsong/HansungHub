@@ -1,5 +1,5 @@
 <a href="https://youtu.be/RlaVpX3FA3k" target="_blank">
-  <img src="https://github.com/user-attachments/assets/7942f426-6f0f-4d26-a645-6e03b386785e" width="300"/>
+  <img src="https://github.com/user-attachments/assets/7942f426-6f0f-4d26-a645-6e03b386785e" width="500"/>
 </a>
 
 > ##### 🎥 이미지를 클릭하면 시연 영상을 볼 수 있습니다.
@@ -45,18 +45,4 @@ Hansung Hub는
 
 ![README md2](https://github.com/user-attachments/assets/eb0db53b-b468-46ec-a912-95300d97b321)
 
-<br>
 
-## 🎯 **기대 효과**
-
-**1. 사용자 피로도 감소** <br>
-→ 구조 통일로 피로감 및 스트레스 최소화
-
-**2. 모바일 접근성 향상** <br>
-→ 장소·기기 제약 없이 한 손으로 예약
-
-**3. 예약 성공률 및 만족도 향상** <br>
-→ 클릭 수 최소화 + 탐색 효율 향상
-
-**4. 서비스 확장 가능성** <br>
-→ 향후 캘린더 연동, 서버 연동 등으로 확장 가능
